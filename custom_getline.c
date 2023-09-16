@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h> 
 
 #define BUFFER_SIZE 1024
 
@@ -12,7 +13,7 @@ ssize_t custom_getline(int fd, char **lineptr, size_t *n)
     char *line;
     size_t pos;
     char c;
-    char *new_line
+    char *new_line;
 
     if (*lineptr == NULL || *n == 0)
     {
@@ -24,7 +25,7 @@ ssize_t custom_getline(int fd, char **lineptr, size_t *n)
         }
     }
     
-    *line = *lineptr;
+    line = *lineptr;
     pos = 0;
 
     while (1)
@@ -51,7 +52,7 @@ ssize_t custom_getline(int fd, char **lineptr, size_t *n)
         if (pos >= *n - 1)
 	{
             *n *= 2;
-            *new_line = (char *)realloc(line, *n);
+            new_line = (char *)realloc(line, *n);
             if (new_line == NULL)
 	    {
                 free(line);
