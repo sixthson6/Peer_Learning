@@ -1,16 +1,10 @@
 #include "main.h"
 
-#define CHUNK_SIZE 128
-
 ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream) {
-    static char buffer[CHUNK_SIZE];
-    static size_t bufferPos = 0;
-    static size_t bytesRead = 0;
-    ssize_t charsRead = 0;
     char *line = *lineptr;
     size_t pos = 0;
-    char *new_line;
     char c;
+    char *new_line;
 
     if (*lineptr == NULL || *n == 0) {
         *n = CHUNK_SIZE;
@@ -18,28 +12,23 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream) {
         if (*lineptr == NULL) {
             return -1;
         }
+        line = *lineptr;
     }
 
     while (1) {
-        if (bufferPos == bytesRead) {
-            bytesRead = fread(buffer, 1, CHUNK_SIZE, stream);
-            if (bytesRead == 0) {
-                if (pos == 0) {
-                    return -1;
-                } else {
-                    break;
-                }
-            }
-            bufferPos = 0;
-        }
+        c = fgetc(stream);
 
-        c = buffer[bufferPos++];
-        charsRead++;
+        if (c == EOF) {
+            if (pos == 0) {
+                return -1;
+            } else {
+                break;
+            }
+        }
 
         if (pos >= *n - 1) {
             *n *= 2;
-            new_line = (char *)realloc(line, *n);
-
+          new_line = (char *)realloc(line, *n);
             if (new_line == NULL) {
                 free(line);
                 *lineptr = NULL;
@@ -57,5 +46,5 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream) {
     }
 
     line[pos] = '\0';
-    return charsRead;
+    return pos;
 }
