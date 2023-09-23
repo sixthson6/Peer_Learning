@@ -1,167 +1,170 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <signal.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <limits.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
 
-#define BUFFER_SIZE 1024
+#define RESET_BUF -1
+#define MAX_BUFFER_SIZE 1024
+#define CUSTOM_UNSIGNED 2
 #define CUSTOM_LOWERCASE 1
-#define CUSTOM_UNSIGNED  2
-extern char **environ;
+#define BUFFER_READ 1024
 
 /**
-  * struct commands_builtin - stuct for func ptrs to builtin cmds
-  * @input: builtin cmds
-  * @function: function
-  */
-
-typedef struct commands_builtin
-{
-	char *input;
-	int (*function)();
-} builtin_commands;
-
-/**
-  * struct Env_type - linklist in path
-  * @str: path e.g(/usr/bin)
-  * @len: string length
-  * @next: next node
-  */
-
-typedef struct Env_type
-{
-	char *str;
-	unsigned int len;
-	struct Env_type *next;
-} type_env;
-
-/**
- * struct liststr - singly linked list
- * @number: the number field
- * @text: a string
- * @next: points to the next node
+ * struct num_str - linked list
+ * @num: number
+ * @str: string
+ * @next: next node
  */
-typedef struct liststr
+
+typedef struct num_str
 {
-        int number;
-        char *text;
-        struct liststr *next;
-} list_t;
+            	int num;
+            	char *str;
+            	struct num_str *next;
+} list_struct;
 
 /**
- * struct CommandInfo - Structure to hold command-related information
- * @argument: Main command argument
- * @arguments_list: List of command arguments
- * @executable_path: Path to the command's executable
- * @argument_count: Number of arguments in arguments_list
- * @line_counter: Line number in the script or input where the command appears
- * @error_number: Error number associated with the command (if any)
- * @line_count_flag: Flag to indicate if line counting is enabled
- * @file_name: Name of the script or file where the command appears
- * @environment_variables: List of environment variables
- * @command_history: List of previously executed commands
- * @command_aliases: List of command aliases
- * @environment: Array of environment variable
- * @history_count: Count of command history
+ * struct program_info - pseudo-arguements
+ * @arg: a string from getline with arg
+ * @argv: arr of str generated from arg
+ * @path: path
+ * @argc: arg count
+ * @line_count: the error count
+ * @err_num: error code
+ * @linecount_flag: if ...
+ * @fname: program filename
+ * @env: linked list 
+ * @environ: custom modified copy env
+ * @history: history
+ * @alias: alias
+ * @env_changed: on if environ was changed
+ * @status: the rturn status
+ * @cmd_buf: adr of ptr to cmd
+ * @cmd_buf_type: CMD_type ||, &&, ;
+ * @readfd: fd 
+ * @histcount: history
  */
-typedef struct CommandInfo
+
+ typedef struct program_info
 {
-    char *argument;gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
-    char **arguments_list;
-    char *executable_path;
-    int argument_count;
-    unsigned int line_counter;
-    int error_number;
-    int line_count_flag;
-    char *file_name;
-    list_t *environment_variables;
-    list_t *command_history;
-    list_t *command_aliases;
-} CommandInfoStruct;
+            	char *arg;
+            	char **argv;
+            	char *path;
+            	int argc;
+            	unsigned int line_count;
+            	int err_num;
+            	int linecount_flag;
+            	char *fname;
+            	list_t *env;
+            	list_t *history;
+            	list_t *alias;
+            	char **environ;
+            	int env_changed;
+            	int status;
+            	char **cmd_buf;
+            	int cmd_buf_type;
+            	int readfd;
+            	int histcount;
+} info_struct;
 
-/*builtin_commands1.c*/
-int cd_command(char **tok);
-int exit_and_free(char **tok, type_env *linklist_env, char *buffer);
-int alias_command(void);
+#define INFO_INIT \
+{NULL, NULL, NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, \
+		0, 0, 0}
 
-/*buitin_command2.c*/
-int history_command(void);
-int setenv_command(char **tok);
-int env_command(char **tok, type_env *env);
+/**
+ * struct builtin - builtin string
+ * @type: the builtin cmd
+ * @func: function
+ */
 
-/*builtin_checker.c*/
-int (*builtin_checker(char *command))();
+typedef struct builtin
+{
+	char *type;
+	int (*func)(info_t *);
+} builtin_table;
 
-/*environment_var.c*/
-type_env *path_list(void);
-char *find_command(char *input, type_env *linklist_env);
-type_env *build_linklist(void);
-int set_environs(const char *key, const char *value, int status);
-int unset_environs(const char *key);
-
-/*execute.c*/
-void execute(char *av[], type_env *linklist_env);
-
-/*_free*/
-void _free(type_env *home);
-
-/*get_environs.c*/
-char *get_environs(const char *key);
-
-/*node_plus.c*/
-type_env *node_plus(type_env **home, char *str, unsigned int length);
+/*printers.c*/
+void error_puts(char *string);
+int error_putchar(char charac);
+/*histories.c*/
+int history_print(info_struct *information);
+int build_history_list(info_struct *information, char *buffer, int lcount);
+int history_renumber(info_struct *information);
+int history_write(info_struct *information);
+char *fetch_history(info_struct *information);
+/*loops.c*/
+int hash_batch(info_struct *information, char **agv);
 
 /*string1.c*/
-unsigned int count_words(char *str);
-int custom_strlen(char *str);
-int custom_strlen_const(const char *str);
-int _isdigit(int c);
-void _print(const char *str);
-
-/*string2.c*/
-int custom_strncmp(char *s1, char *s2, unsigned int bytes);
-int custom_atoi(char *str);
-char *custom_strdup(char *str);
 char *custom_strcat(char *dest, char *src);
+int custom_strlen(char *str);
+int custom_strcmp(char *str1, char *str2);
+char *needle_check(const char *search_string, const char *sub_str);
+/*string2.c*/
+char *custom_strcpy(char *d, char *s);
+int custom_putchar(char c);
+void custom_puts(char *s);
+char *custom_strdup(const char *s);
+/*string3.c*/
+char *custom_strncat(char *d, char *s, int bytes);
+char *custom_strchr(char *str, char c);
+char *custom_strncpy(char *d, char *s, int bytes);
 
-void copy_function(char *string_af, char *source, unsigned int result);
-void set_function(char *string, int input, int num);
-void *realloc_function(char *pointer, unsigned int os, unsigned int ns);
-char *custom_getline(int stream);
-char **convert_function(char *string, char *delimiter);
-/*static void signal_function(int signal);*/
-char *custom_strtok_r(char *str, char *delimiter, char **sp);
-char *custom_strpbrk(char *str, char *num);
-unsigned int custom_strspn(char *str, char *ac);
-char *custom_strchr(char *str, char ch);
+/*error_printer.c*/
+char *conv_num(long int num, int b, int f);
+int error_atoi(char *str);
+void error_print(info_struct *information, char *str);
+int _print(int msg, int filedesc);
+void hush_comments(char *buffer);
 
-/*additional*/
-int displayCommandHistory(CommandInfoStruct *commandInfo);
-int unsetCommandAlias(CommandInfoStruct *commandInfo, char *str);
-int setCommandAlias(CommandInfoStruct *commandInfo, char *str);
-int printCommandAlias(list_t *node);
-int myAlias(CommandInfoStruct *commandInfo);
-void free_text_list(list_t **head_pointer);
-int delete_n_by_index(list_t **head, unsigned int index);
-size_t print_text_list(const list_t *n);
-list_t *append_list_node(list_t **head, const char *text, int number);
-list_t *add_list_node(list_t **head, const char *text, int number);
-ssize_t get_node_with_index(list_t *head, list_t *nd);
+/*custom_getline.c*/
+int custom_getline(info_struct *information, char **ptr, size_t *size);
+void signal_helper(int sig);
+ssize_t buffer_inbut(info_struct *information, char **buffer, size_t *length);
+ssize_t obtain_input(info_struct *information);
 
-list_t *node_with(list_t *nd, char *pf, char c);
-size_t _prints_lists(const list_t *n);
-char **convert_list_to_strings(list_t *head);
-size_t l_length(const list_t *n);
-char *mem_init(char *st, char ba, unsigned int n);
-char *custom_start(const char *h, const char *n);
-char *conv_num(long int number, int base, int formatFlags);
-char *mem_init(char *st, char ba, unsigned int n);
-char *custom_start(const char *h, const char *n);
-char *conv_num(long int number, int base, int formatFlags);
+/*get_info*/
+void info_start(info_struct *information, char **agv);
+void reset_info(info_struct *information);
+void free1(info_struct *information, int entire);
 
-#endif /*MAIN_H*/
+/*interactive_mode.c*/
+int interactive_mode(info_struct *information);
+int custom_atoi(char *str);
+int custom_isalpha(int c);
+
+/*custom_strtok.c*/
+char **custom_strtow(char *str, char *delim);
+char **custom_strtow2(char *str, char delim);
+
+/*utils.c*/
+int search_chain(info_struct *information, char *buffer, size_t *pos);
+void check_chain(info_struct *information, char *buffer, size_t *pos, size_t i, size_t length);
+int alias_exchange(info_struct *information);
+int vars_exchange(info_struct *information);
+int string_exchange(char **old, char *new);
+
+/*env_vars.c*/
+int custom_env_list(info_struct *information);
+int custom_myunsetenv(info_struct *information);
+int custom_mysetenv(info_struct *information);
+char *get_environ(info_struct *information, const char *name);
+int custom_env(info_struct *information);
+
+/*new9_1.c*/
+
+/*new2.c*/
+custom_unset_alias(info_struct *commandInfo, char *text);
+int custom_myalias(info_struct *commandInfo);
+int custom_print_alias(list_struct *node);
+int custom_set_alias(info_struct *commandInfo, char *text);
+int custom_my_history(info_struct *commandInfo);
