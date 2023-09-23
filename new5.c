@@ -29,39 +29,3 @@ char *custom_start(const char *h, const char *n)
 			return (NULL);
 	return ((char *)h);
 }
-
-/**
- * conv_num - function, similar to itoa.
- * @number: The number to be converted.
- * @base: The base for the conversion.
- * @formatFlags: Formatting flags.
- *
- * Return: A string representing the converted number.
- */
-char *conv_num(long int number, int base, int formatFlags)
-{
-    static char *conversionArray;
-    static char conversionBuffer[50];
-    char sign = 0;
-    char *resultPointer;
-    unsigned long n = number;
-
-    if (!(formatFlags & CUSTOM_UNSIGNED) && number < 0)
-    {
-        n = -number;
-        sign = '-';
-    }
-
-    conversionArray = formatFlags & CUSTOM_LOWERCASE ? "0123456789abcdef" : "0123456789ABCDEF";
-    resultPointer = &conversionBuffer[49];
-    *resultPointer = '\0';
-
-    do {
-        *--resultPointer = conversionArray[n % base];
-        n /= base;
-    } while (n != 0);
-
-    if (sign)
-        *--resultPointer = sign;
-    return (resultPointer);
-}

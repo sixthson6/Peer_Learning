@@ -5,7 +5,7 @@
  * @n: pointer
  * Return: size
  */
-size_t l_length(const list_t *n)
+size_t l_length(const list_struct *n)
 {
 	size_t a = 0;
 
@@ -22,12 +22,12 @@ size_t l_length(const list_t *n)
  * @head: pointer
  * Return: text array
  */
-char **convert_list_to_strings(list_t *head)
+char **convert_list_to_strings(list_struct *head)
 {
 	list_t *nd = head;
 	size_t a = l_length(head), b;
 	char **strings;
-	char *text;
+	char *str;
 
 	if (!head || !a)
 		return (NULL);
@@ -36,8 +36,8 @@ char **convert_list_to_strings(list_t *head)
 		return (NULL);
 	for (a = 0; nd; nd = nd->next, a++)
 	{
-		text = malloc(custom_strlen(nd->text) + 1);
-		if (!text)
+		str = malloc(custom_strlen(nd->str) + 1);
+		if (!str)
 		{
 			for (b = 0; b < a; b++)
 				free(strings[b]);
@@ -45,13 +45,12 @@ char **convert_list_to_strings(list_t *head)
 			return (NULL);
 		}
 
-		text = custom_strcpy(text, nd->text);
-		strings[a] = text;
+		str = custom_strcpy(str, nd->str);
+		strings[a] = str;
 	}
 	strings[a] = NULL;
 	return (strings);
 }
-
 
 
 /**
@@ -60,7 +59,7 @@ char **convert_list_to_strings(list_t *head)
  *
  * Return: size of list
  */
-size_t _prints_lists(const list_t *n)
+size_t _prints_lists(const list_struct *n)
 {
 	size_t a = 0;
 
@@ -69,7 +68,7 @@ size_t _prints_lists(const list_t *n)
 		_print(conv_num(n->num, 10, 0));
 		_print(':');
 		_print(' ');
-		_print(n->text? h->text : "(nil)");
+		_print(n->str? n->str : "(nil)");
 		_print("\n");
 		n = n->next;
 		a++;
@@ -85,13 +84,13 @@ size_t _prints_lists(const list_t *n)
  *
  * Return: match node or null
  */
-list_t *node_with(list_t *nd, char *pf, char c)
+list_struct *node_with(list_struct *nd, char *pf, char c)
 {
 	char *a = NULL;
 
 	while (nd)
 	{
-		a = custom_start(nd->text, prefix);
+		a = custom_start(nd->str, pf);
 		if (a && ((c == -1) || (*a == c)))
 			return (nd);
 		nd = nd->next;
@@ -106,10 +105,10 @@ list_t *node_with(list_t *nd, char *pf, char c)
  *
  * Return: index of node or -1
  */
-ssize_t get_node_with_index(list_t *head, list_t *nd)
+ssize_t get_node_with_index(list_struct *head, list_struct *nd)
 {
 	size_t a = 0;
-
+ 
 	while (head)
 	{
 		if (head == nd)
