@@ -12,6 +12,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+extern char **environ
+
 #define RESET_BUF -1
 #define MAX_BUFFER_SIZE 1024
 #define CUSTOM_UNSIGNED 2
@@ -161,6 +163,39 @@ char *get_environ(info_struct *information, const char *name);
 int custom_env(info_struct *information);
 
 /*new9_1.c*/
+ int custom_setenv(info_struct *inf, char *varr, char *val);
+ int custom_unsetenv(info_struct *inf, char *varr);
+ char **obtain_environ(info_struct *inf);
+ int custom_unsetenv(info_struct *inf, char *varr);
+ int custom_setenv(info_struct *inf, char *varr, char *val);
+ char *mem_init(char *st, char ba, unsigned int n);
+ char *custom_start(const char *h, const char *n);
+ ssize_t get_node_with_index(info_struct *head, info_struct *nd);
+ info_struct *node_with(info_struct *nd, char *pf, char c);
+ size_t _prints_lists(const info_struct *n);
+ char **convert_list_to_strings(info_struct *head);
+ size_t l_length(const info_struct *n);
+ void free_text_list(info_struct **head_pointer);
+ int delete_n_by_index(info_struct **head, unsigned int index);
+ size_t print_text_list(const info_struct *n);
+ list_struct *append_list_node(info_struct **head, const char *str, int num);
+ list_struct *add_list_node(info_struct **head, const char *str, int num);
+
+ int unsetCommandAlias(info_struct *commandInfo, char *str);
+ int setCommandAlias(info_struct *commandInfo, char *str);
+ int printCommandAlias(info_struct *nd);
+char *custom_find_path(info_struct *inf, char *pts, char *cmd);
+char *custom_dup_chars(char *pts, int strt, int stp);
+int custom_is_cmd(info_struct *inf, char *path);
+void custom_fork_cmd(info_struct *info)
+void search_command(info_struct *info)
+int search_builtin_cmd(info_struct *info)
+int hash_batch(info_struct *info, char **av)
+
+
+int custom_myhelp(info_struct *info);
+int custom_mycd(info_struct *info);
+int custom_myexit(info_struct *info);
 
 /*new2.c*/
 custom_unset_alias(info_struct *commandInfo, char *text);
